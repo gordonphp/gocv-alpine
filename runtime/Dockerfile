@@ -1,9 +1,9 @@
-FROM denismakogon/gocv-alpine:4.0.1-buildstage as build-stage
+FROM denismakogon/gocv-alpine:4.1.0-buildstage as build-stage
 FROM denismakogon/ffmpeg-alpine:4.0
 
 LABEL maintainer="Denis Makogon. mail: lildee1991@gmail.com"
 
-# OpenCV 4.0.1 shared objects from build-stage
+# OpenCV 4.1.0 shared objects from build-stage
 COPY --from=build-stage /usr/local/lib64 /usr/local/lib64
 COPY --from=build-stage /usr/local/lib64/pkgconfig/opencv4.pc /usr/local/lib64/pkgconfig/opencv4.pc
 COPY --from=build-stage /usr/local/include/opencv4/opencv2 /usr/local/include/opencv4/opencv2
