@@ -1,8 +1,8 @@
-FROM denismakogon/ffmpeg-alpine:4.0-golang
+FROM yveshield/ffmpeg-alpine:4.2-golang
 
 LABEL maintainer="Denis Makogon. mail: lildee1991@gmail.com"
 
-ENV OPENCV_VERSION=4.1.0
+ENV OPENCV_VERSION=4.1.1
 ENV BUILD="ca-certificates \
          git \
          build-base \
@@ -20,19 +20,23 @@ ENV BUILD="ca-certificates \
          tiff \
          libavc1394 \
          jasper-libs \
-         openblas \
          libgphoto2 \
          gstreamer \
          gst-plugins-base"
 
 ENV DEV="clang clang-dev cmake pkgconf \
-         openblas-dev gstreamer-dev gst-plugins-base-dev \
+         gstreamer-dev gst-plugins-base-dev \
          libgphoto2-dev libjpeg-turbo-dev libpng-dev \
          tiff-dev jasper-dev libavc1394-dev"
 
 
 RUN apk update && \
-    apk add --no-cache ${BUILD} ${DEV}
+    apk add --no-cache ${BUILD} ${DEV} && \
+    apk add --repository https://mirror.tuna.tsinghua.edu.cn/alpine/edge/community \
+            --update --no-cache openblas openblas-dev && \
+    # Fix libpng path
+    ln -vfs /usr/include/libpng16 /usr/include/libpng && \
+    ln -vfs /usr/include/locale.h /usr/include/xlocale.h
 
 RUN mkdir /tmp/opencv && \
     cd /tmp/opencv && \
@@ -44,8 +48,17 @@ RUN mkdir /tmp/opencv && \
     cmake \
     -D CMAKE_BUILD_TYPE=RELEASE \
     -D CMAKE_INSTALL_PREFIX=/usr/local \
+    -D CMAKE_C_COMPILER=/usr/bin/clang \
+    -D CMAKE_CXX_COMPILER=/usr/bin/clang++ \
     -D OPENCV_EXTRA_MODULES_PATH=/tmp/opencv/opencv_contrib-${OPENCV_VERSION}/modules \
+    -D WITH_IPP=NO \
+    -D WITH_1394=NO \
+    -D WITH_LIBV4L=NO \
+    -D WITH_V4l=YES \
+    -D WITH_TBB=YES \
     -D WITH_FFMPEG=YES \
+    -D WITH_GPHOTO2=YES \
+    -D WITH_GSTREAMER=YES \
     -D INSTALL_C_EXAMPLES=NO \
     -D INSTALL_PYTHON_EXAMPLES=NO \
     -D BUILD_ANDROID_EXAMPLES=NO \
@@ -57,8 +70,9 @@ RUN mkdir /tmp/opencv && \
     -D BUILD_opencv_python=NO \
     -D BUILD_opencv_python2=NO \
     -D BUILD_opencv_python3=NO \
+    -D BUILD_ANDROID_EXAMPLES=NO \
     -D OPENCV_GENERATE_PKGCONFIG=YES .. && \
-    make -j4 && \
+    make clean && make -j`grep -c '^processor' /proc/cpuinfo` && \
     make install && \
     cd && rm -rf /tmp/opencv
 
