@@ -1,5 +1,5 @@
-FROM denismakogon/gocv-alpine:4.1.0-buildstage as build-stage
-FROM denismakogon/ffmpeg-alpine:4.0
+FROM yveshield/gocv-alpine:4.1.1-buildstage as build-stage
+FROM yveshield/ffmpeg-alpine:4.2
 
 LABEL maintainer="Denis Makogon. mail: lildee1991@gmail.com"
 
@@ -19,7 +19,6 @@ ENV PKG="libstdc++ \
          jasper-libs \
          libavc1394 \
          jasper-libs \
-         openblas \
          libgphoto2 \
          gstreamer \
          gst-plugins-base "
@@ -32,6 +31,8 @@ RUN apk update && \
     wget -q -O /etc/apk/keys/sgerrand.rsa.pub https://github.com/sgerrand/alpine-pkg-glibc/releases/download/2.27-r0/sgerrand.rsa.pub && \
     wget https://github.com/sgerrand/alpine-pkg-glibc/releases/download/2.28-r0/glibc-2.28-r0.apk && \
     apk add --no-cache glibc-2.28-r0.apk && \
+    apk add --repository https://mirror.tuna.tsinghua.edu.cn/alpine/edge/community \
+        --update --no-cache openblas && \
     rm -fr /glibc-2.28-r0.apk && \
     rm -rf /var/cache/apk/* && \
     apk del wget
