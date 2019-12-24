@@ -30,19 +30,20 @@ ENV DEV="clang clang-dev cmake pkgconf \
          tiff-dev jasper-dev libavc1394-dev"
 
 
-RUN apk update && \
-    apk add --no-cache ${BUILD} ${DEV} && \
-    apk add --repository https://mirror.tuna.tsinghua.edu.cn/alpine/edge/community \
-            --update --no-cache openblas openblas-dev && \
+RUN apk update && apk upgrade && apk add --no-cache ${BUILD} ${DEV} && \
     # Fix libpng path
     ln -vfs /usr/include/libpng16 /usr/include/libpng && \
     ln -vfs /usr/include/locale.h /usr/include/xlocale.h
 
-RUN mkdir /tmp/opencv && \
-    cd /tmp/opencv && \
-    wget -O opencv.zip https://github.com/opencv/opencv/archive/${OPENCV_VERSION}.zip && \
+RUN mkdir /tmp/opencv
+
+COPY opencv.zip /tmp/opencv/opencv.zip
+COPY opencv_contrib.zip /tmp/opencv/opencv_contrib.zip
+
+RUN cd /tmp/opencv && \
+    # wget -O opencv.zip https://github.com/opencv/opencv/archive/${OPENCV_VERSION}.zip && \
+    # wget -O opencv_contrib.zip https://github.com/opencv/opencv_contrib/archive/${OPENCV_VERSION}.zip && \
     unzip opencv.zip && \
-    wget -O opencv_contrib.zip https://github.com/opencv/opencv_contrib/archive/${OPENCV_VERSION}.zip && \
     unzip opencv_contrib.zip && \
     mkdir /tmp/opencv/opencv-${OPENCV_VERSION}/build && cd /tmp/opencv/opencv-${OPENCV_VERSION}/build && \
     cmake \

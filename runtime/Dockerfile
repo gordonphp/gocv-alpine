@@ -3,7 +3,7 @@ FROM yveshield/ffmpeg-alpine:4.2
 
 LABEL maintainer="Denis Makogon. mail: lildee1991@gmail.com"
 
-# OpenCV 4.1.0 shared objects from build-stage
+# OpenCV 4.1.1 shared objects from build-stage
 COPY --from=build-stage /usr/local/lib64 /usr/local/lib64
 COPY --from=build-stage /usr/local/lib64/pkgconfig/opencv4.pc /usr/local/lib64/pkgconfig/opencv4.pc
 COPY --from=build-stage /usr/local/include/opencv4/opencv2 /usr/local/include/opencv4/opencv2
@@ -23,9 +23,8 @@ ENV PKG="libstdc++ \
          gstreamer \
          gst-plugins-base "
 
-RUN apk update && \
-    apk upgrade && \
-    apk add --no-cache ${PKG} && \
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirror.tuna.tsinghua.edu.cn/g' /etc/apk/repositories && \
+    apk add -u ${PKG} && \
     # The gblic v2.28-r0 doesn't have sgerrand.rsa.pub.
     # Downloading it from previous version.
     wget -q -O /etc/apk/keys/sgerrand.rsa.pub https://github.com/sgerrand/alpine-pkg-glibc/releases/download/2.27-r0/sgerrand.rsa.pub && \
